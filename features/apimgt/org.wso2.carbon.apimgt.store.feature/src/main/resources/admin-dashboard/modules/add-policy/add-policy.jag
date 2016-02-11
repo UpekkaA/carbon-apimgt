@@ -1,26 +1,15 @@
 <%
 var log = new Log();
 
-var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP, endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit) {
+var addPolicy = function (tierName, conditionsArray, defaultRequestCount,defaultUnitTime,defaultTimeUnit) {
     try {
         var provider = jagg.getUser().username;
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
 
-        //var tierAddedMsg = "Added Tier: "+ tierName + " Request Count: " + requestCount + " Unit Time: " + unitTime + " "+timeUnit+" Starting IP: " + startingIP + " Ending IP: " + endingIP + " HTTP Verb: " + httpVerb
-        //+" Default Request Count: "+defaultRequestCount+" Default Unit Time: "+defaultUnitTime+" "+defaultTimeUnit;
-        var policyParametersMap = constructPolicyParametersMap(tierName, requestCount, unitTime,timeUnit, startingIP,
-                endingIP, httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
-        var tierAddedMsg = "\nAdded Tier: "+ policyParametersMap.get("tierName") + "\nRequest Count: " +
-                policyParametersMap.get("requestCount") + " \nUnit Time: " + policyParametersMap.get("unitTime")
-                + " "+policyParametersMap.get("timeUnit")+"\nStarting IP: " + policyParametersMap.get("startingIP") +
-                "\nEnding IP: " + policyParametersMap.get("requestCount") + "\nHTTP Verb: " + policyParametersMap.get("httpVerb")
-                +"\nDefault Request Count: "+policyParametersMap.get("defaultRequestCount")+"\nDefault Unit Time: "+
-                policyParametersMap.get("defaultUnitTime")+" "+policyParametersMap.get("defaultTimeUnit");
+        var policy = constructPolicyObject(tierName, conditionsArray, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
 
-        log.info(tierAddedMsg);
-
-        apiProvider.addPolicy(policyParametersMap);
+        apiProvider.addPolicy(policy);
 
         return {
             error: false
@@ -35,22 +24,32 @@ var addPolicy = function (tierName, requestCount, unitTime,timeUnit, startingIP,
     }
 };
 
-var constructPolicyParametersMap  = function(tierName, requestCount, unitTime,timeUnit, startingIP, endingIP,
-                                             httpVerb, defaultRequestCount,defaultUnitTime,defaultTimeUnit){
-    var Map = Packages.java.util.HashMap;
-    var policyParametersMap = new Map();
-    policyParametersMap.put("tierName",tierName);
-    policyParametersMap.put("requestCount",requestCount);
-    policyParametersMap.put("unitTime",unitTime);
-    policyParametersMap.put("timeUnit",timeUnit);
-    policyParametersMap.put("startingIP",startingIP);
-    policyParametersMap.put("endingIP",endingIP);
-    policyParametersMap.put("httpVerb",httpVerb);
-    policyParametersMap.put("defaultRequestCount",defaultRequestCount);
-    policyParametersMap.put("defaultUnitTime",defaultUnitTime);
-    policyParametersMap.put("defaultTimeUnit",defaultTimeUnit);
+var constructPolicyObject  = function(tierName, conditionsArray, defaultRequestCount,defaultUnitTime,defaultTimeUnit){
+    var Policy = Packages.org.wso2.carbon.apimgt.api.model.Policy;
+    var Condition = Packages.org.wso2.carbon.apimgt.api.model.Condition;
+    var ArrayList = Packages.java.util.ArrayList;
 
-    return policyParametersMap;
+    var policy = new Policy(tierName);
+
+    policy.setPolicyName(tierName);
+    policy.setDefaultRequestCount(defaultRequestCount);
+    policy.setDefaultUnitTime(defaultUnitTime);
+    policy.setDefaultTimeUnit(defaultTimeUnit);
+
+    var conditions = new ArrayList();
+    for(var i in conditionsArray){
+        var condition = new Condition();
+        condition.setRequestCount(conditionsArray[i].requestCount);
+        condition.setUnitTime(conditionsArray[i].unitTime);
+        condition.setTimeUnit(conditionsArray[i].timeUnit);
+        condition.setStartingIP(conditionsArray[i].startingIP);
+        condition.setEndingIP(conditionsArray[i].endingIP);
+        condition.setHttpVerb(conditionsArray[i].httpVerb);
+        conditions.add(condition);
+    }
+    policy.setConditions(conditions);
+
+    return policy;
 }
 %>
 

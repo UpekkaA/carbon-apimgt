@@ -30,80 +30,192 @@
                      </div>
                     <fieldset>
 
-                        <legend>Throttling Parameters</legend>
-
-
-                        <div class="control-group cnl-group" >
-                            <label class="control-label cnl-label"><%=i18n.localize("requestCount")%> </label>
-                            <div class="controls cnls">
-                                <input type="text" id="requestCount" name="requestCount" />
-                            </div>
-                        </div>
-
-                        <div class="control-group cnl-group" >
-                            <label class="control-label cnl-label"> Unit Time </label>
-                            <div class="controls cnls">
-                                <input type="text" id="unitTime" name="unitTime" />
-                                <select class="select required" id="timeUnit" name="timeUnit" style="width:15%">
-                                    <option value="sec" selected="true">Second(s)</option>
-                                    <option value="min">Minute(s)</option>
-                                    <option value="hour">Hour(s)</option>
-                                </select>
+                        <legend>Throttling Conditions</legend>
+                        <div id="parameters">
+                            <div class="control-group cnl-group" >
+                                <label class="control-label cnl-label"> Quota Policy </label>
+                                <div class="controls cnls">
+                                    <select class="select required" id="quotaPolicy" name="quotaPolicy" onchange="showHideQuotaPolicy()" >
+                                        <option value="request_count_based" selected="true">Based on Request Count</option>
+                                        <option value="bandwidth_based">Based on Bandwidth</option>
+                                    </select>
+                                </div>
                             </div>
 
-                        </div>
-                        <div class="control-group cnl-group">
-                             <label class="control-label cnl-label">Starting IP Address </label>
-                             <div class="controls cnls">
-                             <input type="text" id="startingIP" name="startingIP" <%=nameFieldDisableStatus%>/>
+                            <div id="requestCountBasedDiv">
+                            <div class="control-group cnl-group" >
+                                <label class="control-label cnl-label"><%=i18n.localize("requestCount")%> </label>
+                                <div class="controls cnls">
+                                    <input type="text" id="requestCount" name="requestCount" />
+                                </div>
                             </div>
-                        </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">Ending IP Address </label>
-                            <div class="controls cnls">
-                            <input type="text" id="endingIP" name="endingIP" <%=nameFieldDisableStatus%>/>
+
+                            <div class="control-group cnl-group" >
+                                <label class="control-label cnl-label"> Unit Time </label>
+                                <div class="controls cnls">
+                                    <input type="text" id="unitTime" name="unitTime" />
+                                    <select class="select required" id="timeUnit" name="timeUnit" style="width:15%">
+                                        <option value="sec" selected="true">Second(s)</option>
+                                        <option value="min">Minute(s)</option>
+                                        <option value="hours">Hour(s)</option>
+                                    </select>
+                                </div>
                             </div>
+                            </div>
+
+                            <div id="bandwidthBasedDiv">
+                                <div class="control-group cnl-group" >
+                                    <label class="control-label cnl-label"><%="Bandwidth"%> </label>
+                                    <div class="controls cnls">
+                                        <input type="text" id="bandwidth" name="bandwidth" />
+                                        <select class="select required" id="bandwidthUnit" name="bandwidthUnit" style="width:15%">
+                                            <option value="KB" >KB</option>
+                                            <option value="MB" selected="true" >MB</option>
+                                            <option value="GB">GB</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="control-group cnl-group" >
+                                    <label class="control-label cnl-label"> Unit Time </label>
+                                    <div class="controls cnls">
+                                        <input type="text" id="bandwidthUnitTime" name="bandwidthUnitTime" />
+                                        <select class="select required" id="bandwidthTimeUnit" name="bandwidthTimeUnit" style="width:15%">
+                                            <option value="sec" selected="true">Second(s)</option>
+                                            <option value="min">Minute(s)</option>
+                                            <option value="hours">Hour(s)</option>
+                                            <option value="days">Day(s)</option>
+                                            <option value="months">Month(s)</option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="control-group cnl-group">
+                                 <label class="control-label cnl-label">Starting IP Address </label>
+                                 <div class="controls cnls">
+                                 <input type="text" id="startingIP" name="startingIP" />
+                                </div>
+                            </div>
+                            <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">Ending IP Address </label>
+                                <div class="controls cnls">
+                                <input type="text" id="endingIP" name="endingIP" />
+                                </div>
+                             </div>
+
+                             <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">HTTP Request Method </label>
+                                 <div class="controls cnls">
+                                    <select class="select required" id="httpVerb" name="httpVerb" style="width:15%">
+                                        <option value="" selected="true" >Select</option>
+                                        <option value="GET">GET</option>
+                                        <option value="POST">POST</option>
+                                        <option value="PUT">PUT</option>
+                                        <option value="DELETE">DELETE</option>
+                                        <option value="PATCH">PATCH</option>
+                                        <option value="HEAD">HEAD</option>
+                                        <option value="OPTIONS">OPTIONS</option>
+
+                                    </select>
+                                </div>
+                             </div>
+
+                            <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">HTTP Header Fields </label>
+                                <div class="controls cnls">
+                                    <button id="add-field-btn" name="add-field-btn" type="button" class="btn" >
+                                        <i class="icon-plus-sign"></i>
+                                            Add Header Field
+                                    </button>
+                                    <table id="header-field-table">
+                                        <tbody id="header-field-tbody" name="header-field-tbody"/>
+                                    </table>
+                                </div>
+                            </div>
+
                          </div>
-
                          <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">HTTP Request Method </label>
-                             <div class="controls cnls">
-                                <select class="select required" id="httpVerb" name="httpVerb" style="width:15%">
-                                    <option value="GET" selected="true">GET</option>
-                                    <option value="POST">POST</option>
-                                    <option value="PUT">PUT</option>
-                                    <option value="DELETE">DELETE</option>
-                                    <option value="PATCH">PATCH</option>
-                                    <option value="HEAD">HEAD</option>
-                                    <option value="OPTIONS">OPTIONS</option>
+                         <button id="add-condition-btn" name="add-condition-btn" type="button" class="btn" >
+                                <i class="icon-plus-sign"></i>
+                                    Add Condition
+                        </button>
+                        </div>
 
-                                </select>
-                            </div>
-                         </div>
+                        <table class="table table-bordered" id="policy-condition-table">
+                        <thead>
+                            <tr>
+                                <th class="userSpecialCell" style="width: auto;" ><%="Condition"%></th>
+                                <th class="appSpecialCell"><%="Request Count / Bandwidth"%></th>
+                                <th class="appSpecialCell"><%="Unit Time"%></th>
+                                <th class="appSpecialCell"><%="Actions"%></th>
 
+                            </tr>
+                        </thead>
+                            <tbody id="policy-condition-tbody" name="policy-condition-tbody">
+
+                            </tbody>
+                        </table>
 
                     </fieldset>
 
                     <fieldset>
                         <legend>Default Policy</legend>
+                        <div class="control-group cnl-group" >
+                                <label class="control-label cnl-label"> Quota Policy </label>
+                                <div class="controls cnls">
+                                    <select class="select required" id="defaultQuotaPolicy" name="defaultQuotaPolicy" onchange="showHideDefaultQuotaPolicy()" >
+                                        <option value="request_count_based" selected="true">Based on Request Count</option>
+                                        <option value="bandwidth_based">Based on Bandwidth</option>
+                                    </select>
+                                </div>
+                        </div>
+                        <div id="defaultRequestCountBasedDiv">
+                            <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">Request Count (default) </label>
+                                <div class="controls cnls">
+                                    <input type="text" id="defaultRequestCount" name="defaultRequestCount" />
+                                </div>
+                            </div>
+                            <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">Unit Time (default) </label>
+                                <div class="controls cnls">
+                                    <input type="text" id="defaultUnitTime" name="defaultUnitTime" />
+                                    <select class="select required" id="defaultTimeUnit" name="defaultTimeUnit" style="width:15%">
+                                        <option value="sec" selected="true">Second(s)</option>
+                                        <option value="min">Minute(s)</option>
+                                        <option value="hour">Hour(s)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="defaultBandwidthBasedDiv">
+                             <div class="control-group cnl-group" >
+                                <label class="control-label cnl-label">Bandwidth (default) </label>
+                                <div class="controls cnls">
+                                   <input type="text" id="defaultBandwidth" name="defaultBandwidth" />
+                                      <select class="select required" id="defaultBandwidthUnit" name="defaultBandwidthUnit" style="width:15%">
+                                         <option value="KB" >KB</option>
+                                         <option value="MB" selected="true" >MB</option>
+                                         <option value="GB">GB</option>
+                                      </select>
+                                </div>
+                                </div>
 
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">Request Count (default) </label>
-                            <div class="controls cnls">
-                                <input type="text" id="defaultRequestCount" name="defaultRequestCount" />
-                            </div>
-                        </div>
-                        <div class="control-group cnl-group">
-                            <label class="control-label cnl-label">Unit Time (default) </label>
-                            <div class="controls cnls">
-                                <input type="text" id="defaultUnitTime" name="defaultUnitTime" />
-                                <select class="select required" id="defaultTimeUnit" name="defaultTimeUnit" style="width:15%">
-                                    <option value="sec" selected="true">Second(s)</option>
-                                    <option value="min">Minute(s)</option>
-                                    <option value="hour">Hour(s)</option>
-                                </select>
-                            </div>
-                        </div>
+                             <div class="control-group cnl-group" >
+                                 <label class="control-label cnl-label"> Unit Time (default) </label>
+                                 <div class="controls cnls">
+                                    <input type="text" id="defaultBandwidthUnitTime" name="defaultBandwidthUnitTime" />
+                                       <select class="select required" id="defaultBandwidthTimeUnit" name="defaultBandwidthTimeUnit" style="width:15%">
+                                          <option value="sec" selected="true">Second(s)</option>
+                                          <option value="min">Minute(s)</option>
+                                          <option value="hours">Hour(s)</option>
+                                          <option value="days">Day(s)</option>
+                                          <option value="months">Month(s)</option>
+                                       </select>
+                                 </div>
+                             </div>
+                         </div>
                     </fieldset>
 
                     <div class="form-actions">
@@ -119,11 +231,12 @@
 
 <script>
     $(document).ready(function(){
-
-
         $('#cancel-tier-btn').on('click',function(){
              location.reload(true);
         });
+        showHideQuotaPolicy();
+        showHideDefaultQuotaPolicy();
+
     });
 </script>
 

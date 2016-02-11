@@ -37,6 +37,8 @@
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("analytics") %></a></li>
         <li <%if (reqUrl.match("tier-manage")){%>class="active"<% } %>><a href="<%= partWithContext %>/tier-manage"
         onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= i18n.localize("tierManagement") %></a></li>
+        <li <%if (reqUrl.match("add-policy")){%>class="active"<% } %>><a href="<%= partWithContext %>/add-policy"
+        onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><%= "Add Throttling Policy" %></a></li>
      </ul>
 </div>
 
