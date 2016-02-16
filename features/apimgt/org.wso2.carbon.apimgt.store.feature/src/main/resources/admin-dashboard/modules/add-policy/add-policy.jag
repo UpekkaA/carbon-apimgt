@@ -7,9 +7,9 @@ var addPolicy = function (tierName, conditionsArray, defaultRequestCount,default
         var APIProviderImpl = Packages.org.wso2.carbon.apimgt.impl.APIProviderImpl;
         var apiProvider = new APIProviderImpl(provider);
 
-        var policy = constructPolicyObject(tierName, conditionsArray, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
+        //var policy = constructPolicyObject(tierName, conditionsArray, defaultRequestCount,defaultUnitTime,defaultTimeUnit);
 
-        apiProvider.addPolicy(policy);
+        //apiProvider.addPolicy(policy);
 
         return {
             error: false

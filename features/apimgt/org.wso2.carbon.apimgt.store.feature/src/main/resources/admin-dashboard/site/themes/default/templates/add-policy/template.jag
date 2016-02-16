@@ -28,6 +28,13 @@
                                 <input type="text" id="tierName" name="tierName" <%=nameFieldDisableStatus%>/>
                             </div>
                      </div>
+                     <div class="control-group cnl-group">
+                            <label class="control-label cnl-label"><%=i18n.localize("description")%></label>
+                            <div class="controls cnls">
+                                <textarea id="description" class="text" cols="40" rows ="4" name="description">
+                                </textarea>
+                            </div>
+                     </div>
                     <fieldset>
 
                         <legend>Throttling Conditions</legend>
@@ -92,15 +99,16 @@
                                 </div>
                             </div>
                             <div class="control-group cnl-group">
-                                 <label class="control-label cnl-label">Starting IP Address </label>
+                                 <label class="control-label cnl-label">IP Address Range</label>
                                  <div class="controls cnls">
-                                 <input type="text" id="startingIP" name="startingIP" />
+                                 <input type="text" id="startingIP" name="startingIP" placeholder="Starting IP"/>
+                                 <input type="text" id="endingIP" name="endingIP" placeholder="Ending IP"/>
                                 </div>
                             </div>
                             <div class="control-group cnl-group">
-                                <label class="control-label cnl-label">Ending IP Address </label>
+                                <label class="control-label cnl-label">Specific IP Address </label>
                                 <div class="controls cnls">
-                                <input type="text" id="endingIP" name="endingIP" />
+                                <input type="text" id="specificIP" name="specificIP" />
                                 </div>
                              </div>
 
@@ -134,6 +142,33 @@
                                 </div>
                             </div>
 
+                            <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">Query Parameters </label>
+                                <div class="controls cnls">
+                                    <button id="add-parameter-btn" name="add-parameter-btn" type="button" class="btn" >
+                                        <i class="icon-plus-sign"></i>
+                                            Add Query Parameter
+                                    </button>
+                                    <table id="query-parameter-table">
+                                        <tbody id="query-parameter-tbody" name="query-parameter-tbody"/>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="control-group cnl-group">
+                                 <label class="control-label cnl-label">Date range </label>
+                                 <div class="controls cnls">
+                                 <input type="date" id="startingDate" name="startingDate" placeholder="yyyy-mm-dd"/>
+                                 <input type="date" id="endingDate" name="endingDate" placeholder="yyyy-mm-dd"/>
+                                </div>
+                            </div>
+                            <div class="control-group cnl-group">
+                                <label class="control-label cnl-label">Specific Date </label>
+                                <div class="controls cnls">
+                                <input type="date" id="specificDate" name="specificDate" placeholder="yyyy-mm-dd"/>
+                                </div>
+                             </div>
+
                          </div>
                          <div class="control-group cnl-group">
                          <button id="add-condition-btn" name="add-condition-btn" type="button" class="btn" >
@@ -146,7 +181,7 @@
                         <thead>
                             <tr>
                                 <th class="userSpecialCell" style="width: auto;" ><%="Condition"%></th>
-                                <th class="appSpecialCell"><%="Request Count / Bandwidth"%></th>
+                                <th class="appSpecialCell"><%="Limit"%></th>
                                 <th class="appSpecialCell"><%="Unit Time"%></th>
                                 <th class="appSpecialCell"><%="Actions"%></th>
 

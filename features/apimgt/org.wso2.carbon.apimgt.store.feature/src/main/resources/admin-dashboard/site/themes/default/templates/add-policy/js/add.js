@@ -1,5 +1,6 @@
 var conditionCount = 0;
 var headerFieldCount = 0;
+var queryParameterCount = 0;
 conditionsArray = new Array();
 var addPolicy = function () {
     if(!validateInputs()){
@@ -9,6 +10,7 @@ var addPolicy = function () {
     jagg.post("/site/blocks/add-policy/ajax/add-policy.jag", {
             action:"addPolicy",
             tierName:$('#tierName').val(),
+            description:$('#description').val(),
             conditionsArray:JSON.stringify(conditionsArray),
             defaultRequestCount:$('#defaultRequestCount').val(),
             defaultUnitTime:$('#defaultUnitTime').val(),
@@ -25,21 +27,67 @@ var addPolicy = function () {
 
 function addCondition(element, count){
 
-    var requestCount = $('#requestCount').val();
-    var unitTime = $('#unitTime').val();
-    var startingIP = $('#startingIP').val();
-    var endingIP = $('#endingIP').val();
-    var httpVerb = $('#httpVerb').val();
-    var timeUnit = $('#timeUnit').val();
-    if(httpVerb!="" && startingIP!="" && endingIP!=""){
-        var condition = "verb=='".concat(httpVerb,"' AND ip >= '",startingIP,"' AND ip <= '",endingIP,"'" );
+    var quotaPolicy=$('#quotaPolicy').val();
+    var limit = "";
+    var time = "";
+    if(quotaPolicy=="request_count_based"){
+        var requestCount = $('#requestCount').val();
+        var unitTime = $('#unitTime').val();
+        var timeUnit = $('#timeUnit').val();
+        limit = requestCount.concat(" Request(s)");
+        time= unitTime.concat(" ",timeUnit);
     }
-    else if(httpVerb!="" && (startingIP=="" || endingIP=="")){
-        var condition = "verb=='".concat(httpVerb,"'");
+    if(quotaPolicy=="bandwidth_based"){
+        var bandwidth = $('#bandwidth').val();
+        var bandwidthUnit = $('#bandwidthUnit').val();
+        var bandwidthUnitTime = $('#bandwidthUnitTime').val();
+        var bandwidthTimeUnit = $('#bandwidthTimeUnit').val();
+        limit = bandwidth.concat(" ",bandwidthUnit);
+        time = bandwidthUnitTime.concat(" ",bandwidthTimeUnit);
     }
 
-    else if(httpVerb==""){
-        var condition = "ip >= '".concat(startingIP,"' AND ip <= '",endingIP,"'" )
+    var startingIP = $('#startingIP').val();
+    var endingIP = $('#endingIP').val();
+    var specificIP = $('#specificIP').val();
+
+    var httpVerb = $('#httpVerb').val();
+
+    var startingDate = $('#startingDate').val();
+    var endingDate = $('#endingDate').val();
+    var specificDate = $('#specificDate').val();
+
+
+    var condition = "";
+    if(httpVerb!=""){
+        if(condition !=""){
+            condition = condition.concat(" AND ")
+        }
+        condition = condition.concat("verb=='",httpVerb,"'");
+    }
+    if(startingIP!="" && endingIP!=""){
+        if(condition !=""){
+            condition = condition.concat(" AND ")
+        }
+        condition = condition.concat("('",startingIP,"' <= ip <= '",endingIP,"')" )
+    }
+    if(specificIP!=""){
+        if(condition !=""){
+            condition = condition.concat(" AND ")
+        }
+        condition = condition.concat("ip == '",specificIP,"'");
+    }
+
+    if(startingDate!="" && endingDate!=""){
+        if(condition !=""){
+            condition = condition.concat(" AND ")
+        }
+        condition = condition.concat("('",startingDate,"' <= date <= '",endingDate,"')" )
+    }
+    if(specificDate!=""){
+        if(condition !=""){
+            condition = condition.concat(" AND ")
+        }
+        condition = condition.concat("date == '",specificDate,"'");
     }
 
 
@@ -47,13 +95,13 @@ function addCondition(element, count){
     element.parent().append(
         '<tr id="condition'+count+'">'+
         '<td>'+condition+'</td>'+
-        '<td>'+requestCount+'</td>'+
-        '<td>'+unitTime+' '+timeUnit+'</td>'+
+        '<td>'+limit+'</td>'+
+        '<td>'+time+'</td>'+
         '<td class="delete_resource_td "><a  id="conditionDelete'+count+'" href="javascript:removeCondition('+count+');"><i class="icon-trash"></i></a></td>'+
         '</tr>'
     );
 
-    var conditionObj = {};
+   /* var conditionObj = {};
     conditionObj.id=count;
     conditionObj.requestCount = requestCount;
     conditionObj.unitTime = unitTime;
@@ -62,16 +110,32 @@ function addCondition(element, count){
     conditionObj.endingIP = endingIP;
     conditionObj.httpVerb = httpVerb;
 
-    conditionsArray.push(conditionObj);
+    conditionsArray.push(conditionObj);*/
 
+    $("#quotaPolicy").val('');
     $("#requestCount").val('');
     $("#unitTime").val('');
     $("#timeUnit").val('');
+
+    $("#bandwidth").val('');
+    $("#bandwidthUnit").val('MB');
+    $("#bandwidthUnitTime").val('');
+    $("#bandwidthTimeUnit").val('');
+
     $("#startingIP").val('');
     $("#endingIP").val('');
+    $("#specificIP").val('');
     $("#httpVerb").val('');
 
+    $("#startingDate").val('');
+    $("#endingDate").val('');
+    $("#specificDate").val('');
+
     showHideQuotaPolicy();
+    headerFieldCount = 0;
+    queryParameterCount = 0;
+    $('#header-field-tbody').html('');
+    $('#query-parameter-tbody').html('');
 
 }
 
@@ -88,16 +152,33 @@ function validateConditionInput(){
     var requiredMsg = $('#errorMsgRequired').val();
     var invalidErrorMsg = $('#errorMessageInvalid').val();
 
-    var requestCount = $('#requestCount');
-    var requestCountTxt = requestCount.val();
-    if(!validateNumbersInput(requestCountTxt,requestCount,requiredMsg, invalidErrorMsg)){
-        return false;
+    var quotaPolicy=$('#quotaPolicy').val();
+
+    if(quotaPolicy=="request_count_based") {
+        var requestCount = $('#requestCount');
+        var requestCountTxt = requestCount.val();
+        if (!validateNumbersInput(requestCountTxt, requestCount, requiredMsg, invalidErrorMsg)) {
+            return false;
+        }
+        var unitTime = $('#unitTime');
+        var unitTimeTxt = unitTime.val();
+        if (!validateNumbersInput(unitTimeTxt, unitTime, requiredMsg, invalidErrorMsg)) {
+            return false;
+        }
     }
-    var unitTime = $('#unitTime');
-    var unitTimeTxt = unitTime.val();
-    if(!validateNumbersInput(unitTimeTxt,unitTime,requiredMsg, invalidErrorMsg)){
-        return false;
+    if(quotaPolicy=="bandwidth_based"){
+        var bandwidth = $('#bandwidth');
+        var bandwidthTxt = bandwidth.val();
+        if (!validateNumbersInput(bandwidthTxt, bandwidth, requiredMsg, invalidErrorMsg)) {
+            return false;
+        }
+        var bandwidthUnitTime = $('#bandwidthUnitTime');
+        var bandwidthUnitTimeTxt = bandwidthUnitTime.val();
+        if (!validateNumbersInput(bandwidthUnitTimeTxt, bandwidthUnitTime, requiredMsg, invalidErrorMsg)) {
+            return false;
+        }
     }
+
 
     var startingIP = $('#startingIP');
     var startingIPTxt = startingIP.val();
@@ -119,16 +200,6 @@ function validateConditionInput(){
     if(startingIPTxt=="" && endingIPTxt != ""){
         validateInput(startingIPTxt,startingIP,requiredMsg);
         return false;
-    }
-    var httpVerb = $('#httpVerb');
-    var httpVerbTxt = httpVerb.val();
-
-    if(startingIPTxt=="" && endingIPTxt=="" &&  httpVerbTxt==""){
-        $('#labelEmpty').remove();
-        httpVerb.parent().append('<label class="error" id="labelEmpty" >' + "No conditions added" + '</label>');
-        return false;
-    }else{
-        $('#labelEmpty').remove();
     }
 
     return true;
@@ -203,6 +274,32 @@ $(document).ready(function(){
         ++ headerFieldCount;
         var tBody = $('#header-field-tbody');
         addHeaderField(tBody, headerFieldCount);
+    });
+
+});
+
+function addQueryParameter(element, count){
+
+    var elementId = element.attr('id');
+    element.parent().append(
+        '<tr id="queryParameter'+count+'">'+
+        '<td><div class="clear"></div></td>'+
+        '<td><input type="text" id="queryParameterName'+count+'" name="queryParameterName'+count+'" placeholder="Query Parameter Name"/></td>'+
+        '<td><input type="text" id="queryParameterValue'+count+'" name="queryParameterValue'+count+'" placeholder="Value"/></td>'+
+        '<td class="delete_resource_td"><a  id="queryParameterDelete'+count+'"  href="javascript:removeQueryParameter('+count+')"><i class="icon-trash"></i></a></td>'+
+        '</tr>'
+    );
+}
+
+function removeQueryParameter(count){
+    $('#queryParameter'+count).remove();
+}
+
+$(document).ready(function(){
+    $('#add-parameter-btn').on('click',function(){
+        ++ queryParameterCount;
+        var tBody = $('#query-parameter-tbody');
+        addQueryParameter(tBody, queryParameterCount);
     });
 
 });
