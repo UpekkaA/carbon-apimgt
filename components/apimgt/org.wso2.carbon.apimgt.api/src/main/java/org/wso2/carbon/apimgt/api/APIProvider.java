@@ -19,9 +19,9 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -133,12 +133,8 @@ public interface APIProvider extends APIManager {
 
     void addTier(Tier tier) throws APIManagementException;
 
+    void addPolicy(Policy policy) throws APIManagementException;
 
-    void addTier(String tierName, String requestCount,String unitTime, String startingIp, String endingIp,
-                 String httpverb);
-
-    void addPolicy(HashMap<String, String> policyParametersMap) throws APIManagementException;
-    
     void updateTier(Tier tier) throws APIManagementException;
     
     void removeTier(Tier tier) throws APIManagementException;
@@ -480,7 +476,8 @@ public interface APIProvider extends APIManager {
      * @param  action  Action which need to execute from registry lifecycle
      *
      * */
-     boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action) throws APIManagementException;
+     boolean changeLifeCycleStatus(APIIdentifier apiIdentifier, String action)
+             throws APIManagementException, FaultGatewaysException;
 
     /**
     * This method is to set checklist item values for a particular life-cycle state of an API
@@ -547,5 +544,14 @@ public interface APIProvider extends APIManager {
       */
      String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException;
 
-
+    /**
+     * Get the paginated APIs from publisher
+     *
+     * @param tenantDomain tenant domain
+     * @param start        starting number
+     * @param end          ending number
+     * @return set of API
+     * @throws APIManagementException if failed to get Apis
+     */
+    Map<String, Object> getAllPaginatedAPIs(String tenantDomain, int start, int end) throws APIManagementException;
 }

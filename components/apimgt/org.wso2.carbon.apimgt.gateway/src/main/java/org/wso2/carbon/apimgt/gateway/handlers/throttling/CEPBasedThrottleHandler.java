@@ -9,30 +9,24 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
-import org.apache.neethi.PolicyEngine;
 import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.SynapseException;
-import org.apache.synapse.commons.throttle.core.*;
-import org.apache.synapse.config.Entry;
+import org.apache.synapse.commons.throttle.core.RoleBasedAccessRateController;
+import org.apache.synapse.commons.throttle.core.Throttle;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
-import org.wso2.carbon.h2.osgi.utils.CarbonUtils;
-import org.wso2.throttle.core.Throttler;
-
-
-import java.util.Map;
-import java.util.TreeMap;
+import org.wso2.carbon.throttle.event.core.ThrottlerService;
 
 /**
  * This class is implemented to handle
@@ -61,7 +55,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
      */
     private long version;
 
-    private Throttler throttler;
+    private ThrottlerService throttler = ServiceReferenceHolder.getInstance().getThrottler();
 
     public CEPBasedThrottleHandler() {
         this.applicationRoleBasedAccessController = new RoleBasedAccessRateController();
@@ -145,38 +139,22 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
 
     private boolean doThrottle(MessageContext messageContext) {
         boolean canAccess = true;
-        boolean isResponse = messageContext.isResponse();
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        ConfigurationContext cc = axis2MC.getConfigurationContext();
-        synchronized (this) {
-
-            if (!isResponse) {
-                if (this.throttler == null) {
-                    initThrottle(messageContext, cc);
-                }
-            }
+        if (!messageContext.isResponse()) {
+            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
+                    getAxis2MessageContext();
+            ConfigurationContext cc = axis2MC.getConfigurationContext();
+            doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         }
-        doRoleBasedAccessThrottlingWithCEP(messageContext, cc);
         return canAccess;
     }
 
 
-    private void initThrottle(MessageContext synCtx, ConfigurationContext cc) {
-
-
-        this.throttler = Throttler.getInstance();
-        throttler.deployLocalCEPRules();
-        //throttler.addRule("Gold", null);
-
+    public String getId() {
+        return id;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getId() {
-        return id;
     }
 
     public void setPolicyKey(String policyKey) {
@@ -231,7 +209,7 @@ public class CEPBasedThrottleHandler extends AbstractHandler {
             // It it's a hard limit exceeding, we tell it as service not being available.
             httpErrorCode = HttpStatus.SC_SERVICE_UNAVAILABLE;
         } else {
-            errorCode = APIThrottleConstants.THROTTLE_OUT_ERROR_CODE;
+            errorCode = 503;
             errorMessage = "Message throttled out";
             // By default we send a 429 response back
             httpErrorCode = APIThrottleConstants.SC_TOO_MANY_REQUESTS;
